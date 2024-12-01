@@ -1,0 +1,33 @@
+def hybrid_search(query_text, top_n=5):
+    # Generate embedding for the query
+    query_embedding = embedding_model.encode([query_text])[0]
+
+    # Vector-based search
+    vector_results = collection.query(
+        query_embeddings=[query_embedding],
+        n_results=top_n
+    )
+
+    # Keyword-based search
+    keyword_results = collection.query(
+        query_texts=[query_text],
+        n_results=top_n
+    )
+
+    # Combine results
+    combined_results = []
+    seen = set()
+
+    for result_list in vector_results["documents"]:
+        for result in result_list:
+            if result not in seen:
+                combined_results.append(result)
+                seen.add(result)
+
+    for result_list in keyword_results["documents"]:
+        for result in result_list:
+            if result not in seen:
+                combined_results.append(result)
+                seen.add(result)
+
+    return combined_results
